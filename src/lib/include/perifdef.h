@@ -32,7 +32,15 @@ extern "C" {
 #define DEFINE_PORT(_BNK_) PORT ## _BNK_
 #define DEFINE_PIN(_BNK_, _PIN_) P ## _BNK_ ## _PIN_
 
-// TODO
+#define FLAG_CHECK(_REG_, _FLG_) ((_REG_) & (_FLG_))
+#define FLAG_CLEAR(_REG_, _FLG_) ((_REG_) &= ~(_FLG_))
+#define FLAG_SET(_REG_, _FLG_) ((_REG_) |= (_FLG_))
+#define FLAG_SET_COND(_COND_, _REG_, _FLG_) { \
+	if(_COND_) { \
+		FLAG_SET(_REG_, _FLG_); \
+	} else { \
+		FLAG_CLEAR(_REG_, _FLG_); \
+	}
 
 typedef enum {
 	PERIF_ERR_NONE = 0,
