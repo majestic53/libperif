@@ -26,7 +26,167 @@
 extern "C" {
 #endif // __cplusplus
 
-// TODO
+enum {
+	UMSEL_ASYNC = 0,		// async operation
+	UMSEL_SYNC,			// sync operation
+};
+
+enum {
+	UPM0_DISABLE = 0,		// disable parity
+	UPM1_DISABLE = 0,
+	UPM0_EVEN_PARITY = 0,		// even parity
+	UPM1_EVEN_PARITY = 1,
+	UMP1_ODD_PARITY = 1,		// odd parity
+	UMP0_ODD_PARITY = 1,
+};
+
+enum {
+	USBS_1_BIT = 0,			// 1 stop bit
+	USBS_2_BIT,			// 2 stop bits
+};
+
+enum {
+	UCSZ0_5_BIT = 0,		// 5 bit character
+	UCSZ1_5_BIT = 0,
+	UCSZ2_5_BIT = 0,
+	UCSZ0_6_BIT = 1,		// 6 bit character
+	UCSZ1_6_BIT = 0,
+	UCSZ2_6_BIT = 0,
+	UCSZ0_7_BIT = 0,		// 7 bit character
+	UCSZ1_7_BIT = 1,
+	UCSZ2_7_BIT = 0,
+	UCSZ0_8_BIT = 1,		// 8 bit character
+	UCSZ1_8_BIT = 1,
+	UCSZ2_8_BIT = 0,
+	UCSZ0_9_BIT = 1,		// 9 bit character
+	UCSZ1_9_BIT = 1,
+	UCSZ2_9_BIT = 1,
+};
+
+enum {
+	UCPOL_RX_FALL_TX_RISE = 0,	// clock polarity
+	UCPOL_RX_RISE_TX_FALL,
+};
+
+typedef struct __attribute__((packed)) {
+	uint16_t baud : 12;		// baud rate
+	uint16_t res : 3;
+	uint16_t ursel : 1;		// register select
+} ubrr_part;
+
+typedef struct __attribute__((packed)) {
+	union {
+		ubrr_part part;
+		uint16_t data;
+	} reg;
+} ubrr;
+
+typedef struct __attribute__((packed)) {
+	uint8_t mpcm : 1;		// multi-processor mode
+	uint8_t u2x : 1;		// double transmission speed
+	uint8_t pe : 1;			// parity error flag
+	uint8_t dor : 1;		// data overrun flag
+	uint8_t fe : 1;			// frame error flag
+	uint8_t udre : 1;		// data register empty flag
+	uint8_t txc : 1;		// transmit complete flag
+	uint8_t rxc : 1;		// receive complete flag
+} ucsra_part;
+
+typedef struct __attribute__((packed)) {
+	union {
+		ucsra_part part;
+		uint8_t data;
+	} reg;
+} ucsra;
+
+typedef struct __attribute__((packed)) {
+	uint8_t txb8 : 1;		// 9th data bit
+	uint8_t rxb8 : 1;		// 9th data bit
+	uint8_t ucsz2 : 1;		// character size (1:3)
+	uint8_t txen : 1;		// transmit enable flag
+	uint8_t rxen : 1;		// receive enable flag
+	uint8_t udrie : 1;		// data register empty interrupt enable flag
+	uint8_t txcie : 1;		// transmit complete interrupt enable flag
+	uint8_t rxcie : 1;		// receieve complete interrupt enable flag
+} ucsrb_part;
+
+typedef struct __attribute__((packed)) {
+	union {
+		ucsrb_part part;
+		uint8_t data;
+	} reg;
+} ucsrb;
+
+typedef struct __attribute__((packed)) {
+	uint8_t ucpol : 1;		// clock polarity
+	uint8_t ucsz0 : 1;		// character size (1:3)
+	uint8_t ucsz1 : 1;		// character size (1:3)
+	uint8_t usbs : 1;		// stop bit select
+	uint8_t upm0 : 1;		// parity mode (1:2)
+	uint8_t upm1 : 1;		// parity mode (1:2)
+	uint8_t umsel : 1;		// usart mode
+	uint8_t ursel : 1;		// register select
+} ucsrc_part;
+
+typedef struct __attribute__((packed)) {
+	union {
+		ucsrc_part part;
+		uint8_t data;
+	} reg;
+} ucsrc;
+
+typedef struct __attribute__((packed)) {
+
+	// baud rate register
+	volatile uint16_t *brr;
+	uint16_t brr_prev;
+
+	// serial data register
+	volatile uint8_t *udr;
+	uint8_t udr_prev;
+
+	// control/status registers
+	volatile uint8_t *sra;
+	uint8_t sra_prev;
+	volatile uint8_t *srb;
+	uint8_t srb_prev;
+	volatile uint8_t *src;
+	uint8_t src_prev;
+} usart;
+
+#define usart_init(_CONT_, _BNK_, _SRA_, _SRB_, _SRC_, _BRR_, _UDR_) \
+	_usart_init(_CONT_, &DEFINE_REG_EXT(_BNK_, UCSR, A), \
+	&DEFINE_REG_EXT(_BNK_, UCSR, B), &DEFINE_REG_EXT(_BNK_, UCSR, C), \
+	&DEFINE_REG(_BNK_, UBRR), &DEFINE_REG(_BNK_, UDR), \
+	_SRA_, _SRB_, _SRC_, _BRR_, _UDR_)
+
+periferr_t _usart_init(
+	__inout usart *cont,
+	__in volatile uint8_t *sra,
+	__in volatile uint8_t *srb,
+	__in volatile uint8_t *src,
+	__in volatile uint16_t *brr,
+	__in volatile uint8_t *udr,
+	__in ucsra sra_cfg,
+	__in ucsrb srb_cfg,
+	__in ucsrc src_cfg,
+	__in ubrr brr_cfg,
+	__in uint8_t udr_val
+	);
+
+periferr_t usart_read(
+	__in usart *cont,
+	__inout uint16_t *val
+	);
+
+periferr_t usart_uninit(
+	__inout usart *cont
+	);
+
+periferr_t usart_write(
+	__in usart *cont,
+	__in uint16_t val
+	);
 
 #ifdef __cplusplus
 }

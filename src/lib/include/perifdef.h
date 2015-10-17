@@ -20,6 +20,8 @@
 #ifndef PERIFDEF_H_
 #define PERIFDEF_H_
 
+//#define NDEBUG
+
 #include <stddef.h>
 #include <stdint.h>
 #include <avr/io.h>
@@ -28,18 +30,31 @@
 extern "C" {
 #endif // __cplusplus
 
+#ifndef __in
+#define __in
+#endif // __in
+#ifndef __inout
+#define __inout
+#endif // __inout
+#ifndef __out
+#define __out
+#endif // __out
+
 #define DEFINE_DDR(_BNK_) DDR ## _BNK_
 #define DEFINE_PORT(_BNK_) PORT ## _BNK_
 #define DEFINE_PIN(_BNK_, _PIN_) P ## _BNK_ ## _PIN_
+#define DEFINE_REG(_BNK_, _REG_) _REG_ ## _BNK_
+#define DEFINE_REG_EXT(_BNK_, _REG_, _EXT_) _REG_ ## _BNK_ ## _EXT_
 
-#define FLAG_CHECK(_REG_, _FLG_) ((_REG_) & (_FLG_))
-#define FLAG_CLEAR(_REG_, _FLG_) ((_REG_) &= ~(_FLG_))
-#define FLAG_SET(_REG_, _FLG_) ((_REG_) |= (_FLG_))
+#define FLAG_CHECK(_REG_, _FLG_) (*(_REG_) & (_FLG_))
+#define FLAG_CLEAR(_REG_, _FLG_) (*(_REG_) &= ~(_FLG_))
+#define FLAG_SET(_REG_, _FLG_) (*(_REG_) |= (_FLG_))
 #define FLAG_SET_COND(_COND_, _REG_, _FLG_) { \
 	if(_COND_) { \
 		FLAG_SET(_REG_, _FLG_); \
 	} else { \
 		FLAG_CLEAR(_REG_, _FLG_); \
+	}\
 	}
 
 typedef enum {
@@ -48,6 +63,11 @@ typedef enum {
 } periferr_t;
 
 #define PERIF_ERR(_ERR_) ((_ERR_) != PERIF_ERR_NONE)
+
+#define PERIF_VER_MAJ 0
+#define PERIF_VER_MIN 1
+#define PERIF_VER_REV 1
+#define PERIF_VER_WEEK 1542
 
 #ifdef __cplusplus
 }
