@@ -23,6 +23,10 @@ Changelog
 =========
 
 ###Version 0.1.1542
+*Updated: 10/18/2015*
+
+* Completed/tested USART
+
 *Updated: 10/15/2015*
 
 * Initial commit
