@@ -144,6 +144,8 @@ typedef struct __attribute__((packed)) {
 	// serial data register
 	volatile uint8_t *udr;
 	uint8_t udr_prev;
+	uint8_t rxc_pin;
+	uint8_t udre_pin;
 
 	// control/status registers
 	volatile uint8_t *sra;
@@ -154,11 +156,34 @@ typedef struct __attribute__((packed)) {
 	uint8_t src_prev;
 } usart;
 
-#define usart_init(_CONT_, _BNK_, _SRA_, _SRB_, _SRC_, _BRR_, _UDR_) \
+typedef struct __attribute__((packed)) {
+	uint8_t high;
+	uint8_t low;
+} usart_frame_part;
+
+typedef struct __attribute__((packed)) {
+	union {
+		usart_frame_part part;
+		uint16_t data;
+	} frm;
+} usart_frame;
+
+/*
+ * Initialize usart session
+ * @param _CONT_ valid pointer to a user supplied context
+ * @param _BNK_ usart register bank (typically 0 or 1)
+ * @param _SRA_ ucsra control/status register value
+ * @param _SRB_ ucsrb control/status register value
+ * @param _SRC_ ucsrc control/status register value
+ * @param _BRR_ ubrr baud rate register value
+ * @return PERIF_ERR_NONE on success
+ */
+#define usart_init(_CONT_, _BNK_, _SRA_, _SRB_, _SRC_, _BRR_) \
 	_usart_init(_CONT_, &DEFINE_REG_EXT(_BNK_, UCSR, A), \
 	&DEFINE_REG_EXT(_BNK_, UCSR, B), &DEFINE_REG_EXT(_BNK_, UCSR, C), \
 	&DEFINE_REG(_BNK_, UBRR), &DEFINE_REG(_BNK_, UDR), \
-	_SRA_, _SRB_, _SRC_, _BRR_, _UDR_)
+	_SRA_, _SRB_, _SRC_, _BRR_, 0, DEFINE_REG(_BNK_, RXC), \
+	DEFINE_REG(_BNK_, UDRE))
 
 periferr_t _usart_init(
 	__inout usart *cont,
@@ -171,21 +196,40 @@ periferr_t _usart_init(
 	__in ucsrb srb_cfg,
 	__in ucsrc src_cfg,
 	__in ubrr brr_cfg,
-	__in uint8_t udr_val
+	__in uint8_t udr_val,
+	__in uint8_t rxc_pin,
+	__in uint8_t udre_pin
 	);
 
+/*
+ * Read frame from a usart session
+ * @param cont valid pointer to a user supplied context
+ * @param frm valid pointer to a user supplied frame
+ * @return PERIF_ERR_NONE on success
+ */
 periferr_t usart_read(
 	__in usart *cont,
-	__inout uint16_t *val
+	__inout usart_frame *frm
 	);
 
+/*
+ * Uninitialize usart session
+ * @param cont valid pointer to a user supplied context
+ * @return PERIF_ERR_NONE on success
+ */
 periferr_t usart_uninit(
 	__inout usart *cont
 	);
 
+/*
+ * Write frame to a usart session
+ * @param cont valid pointer to a user supplied context
+ * @param frm frame to write
+ * @return PERIF_ERR_NONE on success
+ */
 periferr_t usart_write(
 	__in usart *cont,
-	__in uint16_t val
+	__in usart_frame frm
 	);
 
 #ifdef __cplusplus

@@ -20,7 +20,7 @@
 #ifndef PERIFDEF_H_
 #define PERIFDEF_H_
 
-//#define NDEBUG
+#define NDEBUG
 
 #include <stddef.h>
 #include <stdint.h>

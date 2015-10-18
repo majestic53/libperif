@@ -17,20 +17,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define BAUD 9600
+
 #include <util/delay.h>
+#define BAUD 9600
 #include <util/setbaud.h>
 #include "../lib/include/usart.h"
 
 int 
 main(void)
 {
-	uint16_t val;
 	ubrr brr = { 0 };
 	ucsra sra = { 0 };
 	ucsrb srb = { 0 };
 	ucsrc src = { 0 };
 	usart cont = { 0 };
+	usart_frame frm = { 0 };
 	periferr_t result = PERIF_ERR_NONE;
 
 	brr.reg.data = UBRR_VALUE;
@@ -50,21 +51,21 @@ main(void)
 	PORTB &= ~_BV(PB5);
 	// ---
 
-	result = usart_init(&cont, 1, sra, srb, src, brr, 0);
+	result = usart_init(&cont, 1, sra, srb, src, brr);
 	if(PERIF_ERR(result)) {
 		goto exit;
 	}
 
 	for(;;) {
 
-		result = usart_read(&cont, &val);
+		result = usart_read(&cont, &frm);
 		if(PERIF_ERR(result)) {
 			goto exit;
 		}
 
 		_delay_ms(100);
 
-		result = usart_write(&cont, val);
+		result = usart_write(&cont, frm);
 		if(PERIF_ERR(result)) {
 			goto exit;
 		}

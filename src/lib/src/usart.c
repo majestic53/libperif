@@ -17,14 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include "../include/usart.h"
 
-#define FLAG_RXC _BV(7)
 #define FLAG_RXB8 _BV(1)
 #define FLAG_TXB8 _BV(0)
 #define FLAG_UCSZ2 _BV(2)
-#define FLAG_UDRE _BV(5)
 
 periferr_t 
 _usart_init(
@@ -38,7 +35,9 @@ _usart_init(
 	__in ucsrb srb_cfg,
 	__in ucsrc src_cfg,
 	__in ubrr brr_cfg,
-	__in uint8_t udr_val
+	__in uint8_t udr_val,
+	__in uint8_t rxc_pin,
+	__in uint8_t udre_pin
 	)
 {
 	periferr_t result = PERIF_ERR_NONE;
@@ -56,6 +55,10 @@ _usart_init(
 	cont->srb = srb;
 	cont->src = src;
 	cont->udr = udr;
+
+	// cache pins
+	cont->rxc_pin = rxc_pin;
+	cont->udre_pin = udre_pin;
 
 	// cache previous register configuration
 	cont->brr_prev = *cont->brr;
@@ -80,30 +83,31 @@ exit:
 periferr_t 
 usart_read(
 	__in usart *cont,
-	__inout uint16_t *val
+	__inout usart_frame *frm
 	)
 {
 	periferr_t result = PERIF_ERR_NONE;
 
 #ifndef NDEBUG
 	if(!cont || !cont->sra || !cont->srb || !cont->src 
-			|| !cont->brr || !cont->udr || !val) {
+			|| !cont->brr || !cont->udr || !frm) {
 		result = PERIF_ERR_INVARG;
 		goto exit;
 	}
 #endif // NDEBUG
 
-	*val = 0;
-	loop_until_bit_is_set(cont->sra, FLAG_RXC);
+	frm->frm.data = 0;
+	loop_until_bit_is_set(*cont->sra, cont->rxc_pin);
 
 	if(FLAG_CHECK(cont->srb, FLAG_UCSZ2)) {
 
 		// read 9th bit (if applicable)
-		*val += (FLAG_CHECK(cont->srb, FLAG_RXB8) ? (UINT8_MAX + 1) : 0);
+		frm->frm.data 
+			+= (FLAG_CHECK(cont->srb, FLAG_RXB8) ? (UINT8_MAX + 1) : 0);
 	}
 
 	// read received bits
-	*val += *cont->udr;
+	frm->frm.data += *cont->udr;
 
 #ifndef NDEBUG
 exit:
@@ -143,6 +147,8 @@ usart_uninit(
 	cont->srb_prev = 0;
 	cont->src_prev = 0;
 	cont->udr_prev = 0;
+	cont->rxc_pin = 0;
+	cont->udre_pin = 0;
 
 #ifndef NDEBUG
 exit:
@@ -153,29 +159,30 @@ exit:
 periferr_t 
 usart_write(
 	__in usart *cont,
-	__in uint16_t val
+	__in usart_frame frm
 	)
 {
 	periferr_t result = PERIF_ERR_NONE;
 
 #ifndef NDEBUG
 	if(!cont || !cont->sra || !cont->srb || !cont->src 
-			|| !cont->brr || !cont->udr || !val) {
+			|| !cont->brr || !cont->udr) {
 		result = PERIF_ERR_INVARG;
 		goto exit;
 	}
 #endif // NDEBUG
 
-	loop_until_bit_is_set(cont->sra, FLAG_UDRE);
+	loop_until_bit_is_set(*cont->sra, cont->udre_pin);
 
 	if(FLAG_CHECK(cont->srb, FLAG_UCSZ2)) {
 
 		// write 9th bit (if applicable)
-		FLAG_SET_COND(val & (UINT8_MAX + 1), cont->srb, FLAG_TXB8);
+		FLAG_SET_COND(frm.frm.data & (UINT8_MAX + 1), 
+			cont->srb, FLAG_TXB8);
 	}
 
 	// write bits
-	*cont->udr = (val & UINT8_MAX);
+	*cont->udr = (frm.frm.data & UINT8_MAX);
 
 #ifndef NDEBUG
 exit:
