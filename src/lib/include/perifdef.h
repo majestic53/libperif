@@ -119,7 +119,7 @@ typedef enum {
 	PERIF_ERR_NONE = 0,
 	PERIF_ERR_INVARG,
 
-	// add additional error here
+	// add additional error codes here
 } periferr_t;
 
 /*

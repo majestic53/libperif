@@ -53,7 +53,7 @@ _hc595_init(
 	cont->ddr_prev = *cont->ddr;
 	cont->port_prev = *cont->port;
 
-	// assign new register configuration
+	// assign register configuration
 	mask = (cont->clk_pin | cont->data_pin 
 		| cont->lat_pin);
 	FLAG_SET(cont->ddr, mask);
@@ -108,7 +108,7 @@ hc595_write(
 	periferr_t result = PERIF_ERR_NONE;
 
 #ifndef NDEBUG
-	if(!cont || !frm) {
+	if(!cont || !cont->ddr || !cont->port || !frm) {
 		result = PERIF_ERR_INVARG;
 		goto exit;
 	}
@@ -116,7 +116,7 @@ hc595_write(
 
 	data = frm->data;
 
-	for(; iter < HC595_FRM_LEN; ++iter) {
+	for(; iter < HC595_FRM_LEN; ++iter, data >>= 1) {
 
 		// write single bit to data pin
 		FLAG_SET_COND(data & FMR_8_BIT_MSB, cont->port, 
@@ -125,7 +125,6 @@ hc595_write(
 		// clock out single bit on data pin
 		FLAG_SET(cont->port, cont->clk_pin);
 		FLAG_CLEAR(cont->port, cont->clk_pin);
-		data >>= 1;
 	}
 
 	// latch data
