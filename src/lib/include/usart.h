@@ -74,6 +74,9 @@ typedef struct __attribute__((packed)) {
 	uint16_t ursel : 1;		// register select
 } ubrr_part;
 
+/*
+ * Holds UBRR register configuration
+ */
 typedef struct __attribute__((packed)) {
 	union {
 		ubrr_part part;
@@ -92,6 +95,9 @@ typedef struct __attribute__((packed)) {
 	uint8_t rxc : 1;		// receive complete flag
 } ucsra_part;
 
+/*
+ * Holds UCSRA register configuration
+ */
 typedef struct __attribute__((packed)) {
 	union {
 		ucsra_part part;
@@ -110,6 +116,9 @@ typedef struct __attribute__((packed)) {
 	uint8_t rxcie : 1;		// receieve complete interrupt enable flag
 } ucsrb_part;
 
+/*
+ * Holds UCSRB register configuration
+ */
 typedef struct __attribute__((packed)) {
 	union {
 		ucsrb_part part;
@@ -128,6 +137,9 @@ typedef struct __attribute__((packed)) {
 	uint8_t ursel : 1;		// register select
 } ucsrc_part;
 
+/*
+ * Holds UCSRC register configuration
+ */
 typedef struct __attribute__((packed)) {
 	union {
 		ucsrc_part part;
@@ -135,6 +147,9 @@ typedef struct __attribute__((packed)) {
 	} reg;
 } ucsrc;
 
+/*
+ * Holds usart session information
+ */
 typedef struct __attribute__((packed)) {
 
 	// baud rate register
@@ -161,6 +176,9 @@ typedef struct __attribute__((packed)) {
 	uint8_t low;
 } usart_frame_part;
 
+/*
+ * Holds usart frame data
+ */
 typedef struct __attribute__((packed)) {
 	union {
 		usart_frame_part part;
@@ -202,7 +220,7 @@ periferr_t _usart_init(
 	);
 
 /*
- * Read frame from a usart session
+ * Read frame from usart session
  * @param cont valid pointer to a user supplied context
  * @param frm valid pointer to a user supplied frame
  * @return PERIF_ERR_NONE on success
@@ -222,14 +240,14 @@ periferr_t usart_uninit(
 	);
 
 /*
- * Write frame to a usart session
+ * Write frame to usart session
  * @param cont valid pointer to a user supplied context
  * @param frm frame to write
  * @return PERIF_ERR_NONE on success
  */
 periferr_t usart_write(
 	__in usart *cont,
-	__in usart_frame frm
+	__in usart_frame *frm
 	);
 
 #ifdef __cplusplus

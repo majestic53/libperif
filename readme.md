@@ -23,11 +23,12 @@ Changelog
 =========
 
 ###Version 0.1.1542
-*Updated: 10/18/2015*
+*Updated:10/18/2015*
 
-* Completed/tested USART
+* Implemented USART (tested)
+* Implemented HC595 (untested)
 
-*Updated: 10/15/2015*
+*Updated:10/15/2015*
 
 * Initial commit
 

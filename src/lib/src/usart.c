@@ -123,7 +123,8 @@ usart_uninit(
 	periferr_t result = PERIF_ERR_NONE;
 
 #ifndef NDEBUG
-	if(!cont) {
+	if(!cont || !cont->sra || !cont->srb || !cont->src 
+			|| !cont->brr || !cont->udr) {
 		result = PERIF_ERR_INVARG;
 		goto exit;
 	}
@@ -159,14 +160,14 @@ exit:
 periferr_t 
 usart_write(
 	__in usart *cont,
-	__in usart_frame frm
+	__in usart_frame *frm
 	)
 {
 	periferr_t result = PERIF_ERR_NONE;
 
 #ifndef NDEBUG
 	if(!cont || !cont->sra || !cont->srb || !cont->src 
-			|| !cont->brr || !cont->udr) {
+			|| !cont->brr || !cont->udr || !frm) {
 		result = PERIF_ERR_INVARG;
 		goto exit;
 	}
@@ -177,12 +178,12 @@ usart_write(
 	if(FLAG_CHECK(cont->srb, FLAG_UCSZ2)) {
 
 		// write 9th bit (if applicable)
-		FLAG_SET_COND(frm.frm.data & (UINT8_MAX + 1), 
+		FLAG_SET_COND(frm->frm.data & (UINT8_MAX + 1), 
 			cont->srb, FLAG_TXB8);
 	}
 
 	// write bits
-	*cont->udr = (frm.frm.data & UINT8_MAX);
+	*cont->udr = (frm->frm.data & UINT8_MAX);
 
 #ifndef NDEBUG
 exit:
