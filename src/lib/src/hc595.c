@@ -116,7 +116,7 @@ hc595_write(
 
 	data = frm->data;
 
-	for(; iter < HC595_FRM_LEN; ++iter, data >>= 1) {
+	for(; iter < HC595_FRM_LEN; ++iter, data <<= 1) {
 
 		// write single bit to data pin
 		FLAG_SET_COND(data & FMR_8_BIT_MSB, cont->port, 

@@ -32,6 +32,7 @@
 #define HC595_CLK_PIN 5
 #define HC595_DATA_PIN 0
 #define HC595_LAT_PIN 1
+#define HC595_LOOP_DEL 100			// ms
 
 #define USART_BNK 1
 #define USART_ENAB_RX 1
@@ -67,6 +68,7 @@ test_hc595(void)
 			goto exit;
 		}
 
+		_delay_ms(HC595_LOOP_DEL);
 		++frm.data;
 	}
 
