@@ -85,21 +85,21 @@ extern "C" {
  * @param _REG_ register name
  * @param _FLG_ flag offset/mask (0 - 0xff)
  */
-#define FLAG_CHECK(_REG_, _FLG_) (*(_REG_) & (_FLG_))
+#define FLAG_CHECK(_REG_, _FLG_) ((*(_REG_)) & (_FLG_))
 
 /*
  * Clear register flag value
  * @param _REG_ register name
  * @param _FLG_ flag offset/mask (0 - 0xff)
  */
-#define FLAG_CLEAR(_REG_, _FLG_) (*(_REG_) &= ~(_FLG_))
+#define FLAG_CLEAR(_REG_, _FLG_) ((*(_REG_)) &= ~(_FLG_))
 
 /*
  * Set register flag value
  * @param _REG_ register name
  * @param _FLG_ flag offset/mask (0 - 0xff)
  */
-#define FLAG_SET(_REG_, _FLG_) (*(_REG_) |= (_FLG_))
+#define FLAG_SET(_REG_, _FLG_) ((*(_REG_)) |= (_FLG_))
 
 /*
  * Conditionally set register flag value
@@ -131,8 +131,8 @@ typedef enum {
 
 #define PERIF_VER_MAJ 0
 #define PERIF_VER_MIN 1
-#define PERIF_VER_REV 2
-#define PERIF_VER_WEEK 1542
+#define PERIF_VER_REV 1
+#define PERIF_VER_WEEK 1543
 
 #ifdef __cplusplus
 }

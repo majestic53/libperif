@@ -49,6 +49,64 @@ debug_exception(
 }
 
 periferr_t 
+test_usart_init(
+	__inout usart *cont
+	)
+{
+	ubrr brr = { 0 };
+	ucsra sra = { 0 };
+	ucsrb srb = { 0 };
+	ucsrc src = { 0 };
+	periferr_t result = PERIF_ERR_NONE;
+
+	if(!cont) {
+		result = PERIF_ERR_INVARG;
+		goto exit;
+	}
+
+	brr.reg.data = UBRR_VALUE;
+#if USE_2X
+	sra.reg.part.u2x = 1;
+#else
+	sra.reg.part.u2x = 0;
+#endif // USE_2X
+	srb.reg.part.rxen = USART_ENAB_RX;	// enable rx
+	srb.reg.part.txen = USART_ENAB_TX;	// enable tx
+	src.reg.part.ucsz0 = UCSZ0_8_BIT;	// set character size to 8 bits
+	src.reg.part.ucsz1 = UCSZ1_8_BIT;
+	srb.reg.part.ucsz2 = UCSZ2_8_BIT;
+
+	result = usart_init(cont, USART_BNK, sra, srb, src, brr);
+	if(PERIF_ERR(result)) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+periferr_t 
+test_usart_uninit(
+	__inout usart *cont
+	)
+{
+	periferr_t result = PERIF_ERR_NONE;
+
+	if(!cont) {
+		result = PERIF_ERR_INVARG;
+		goto exit;
+	}
+
+	result = usart_uninit(cont);
+	if(PERIF_ERR(result)) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+periferr_t 
 test_hc595(void)
 {
 	hc595 cont = { 0 };
@@ -61,7 +119,7 @@ test_hc595(void)
 		goto exit;
 	}
 
-	for(;;) {
+	for(;; ++frm.data) {
 
 		result = hc595_write(&cont, &frm);
 		if(PERIF_ERR(result)) {
@@ -69,7 +127,6 @@ test_hc595(void)
 		}
 
 		_delay_ms(HC595_LOOP_DEL);
-		++frm.data;
 	}
 
 	result = hc595_uninit(&cont);
@@ -84,27 +141,11 @@ exit:
 periferr_t 
 test_usart(void)
 {
-	ubrr brr = { 0 };
-	ucsra sra = { 0 };
-	ucsrb srb = { 0 };
-	ucsrc src = { 0 };
 	usart cont = { 0 };
 	usart_frame frm = { 0 };
 	periferr_t result = PERIF_ERR_NONE;
 
-	brr.reg.data = UBRR_VALUE;
-#if USE_2X
-	sra.reg.part.u2x = 1;
-#else
-	sra.reg.part.u2x = 0;
-#endif // USE_2X
-	srb.reg.part.rxen = USART_ENAB_RX;	// enable rx
-	srb.reg.part.txen = USART_ENAB_TX;	// enable tx
-	src.reg.part.ucsz0 = UCSZ0_8_BIT;	// set character size to 8 bits
-	src.reg.part.ucsz1 = UCSZ1_8_BIT;
-	srb.reg.part.ucsz2 = UCSZ2_8_BIT;
-
-	result = usart_init(&cont, USART_BNK, sra, srb, src, brr);
+	result = test_usart_init(&cont);
 	if(PERIF_ERR(result)) {
 		goto exit;
 	}
@@ -124,7 +165,7 @@ test_usart(void)
 		}
 	}
 
-	result = usart_uninit(&cont);
+	result = test_usart_uninit(&cont);
 	if(PERIF_ERR(result)) {
 		goto exit;
 	}

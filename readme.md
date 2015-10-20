@@ -23,6 +23,10 @@ Changelog
 =========
 
 ###Version 0.1.1542
+*Updated:10/19/2015*
+
+* Implemented HC595 (tested)
+
 *Updated:10/18/2015*
 
 * Implemented USART (tested)
